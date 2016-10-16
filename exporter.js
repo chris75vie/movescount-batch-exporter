@@ -1,23 +1,26 @@
 // ==UserScript==
 // @name       Movescount Batch Exporter
 // @namespace  http://alexbr.com
-// @version    0.2
+// @version    0.2.1
 // @description  Batch export moves from Movescount. Based on http://userscripts-mirror.org/scripts/show/155662
 // @match      http://*.movescount.com/summary
 // @include    htt*://*.movescount.com/summary
 // @require http://code.jquery.com/jquery-2.1.4.min.js
 // @require https://raw.github.com/lodash/lodash/3.10.0/lodash.min.js
 // ==/UserScript==
-(function() {
-"use strict";
 
+(function() {
+"use strict";    
 function exportMoves(format) {
     var moveIds = [];
     var wins = [];
     $('a[data-id^="move-"] i.active').each(function() {
         moveIds.push($(this).parent().attr('data-id').substring(5));
     });
-
+    var searchableStr   = document.URL + '&';
+    var value1  = searchableStr.match (/[\?\&]moves=([^\&\#]+)[\&\#]/i) [1];
+    moveIds = value1.split("+");
+    
     if (confirm("This will export " + moveIds.length + " in format: " + format + ". Press Ok to export or Cancel to abort.")) {
         _.each(moveIds, function(moveId) {
             var urlstring = 'http://www.movescount.com/move/export?id=' + moveId + '&format=';
@@ -54,9 +57,10 @@ var formats = {
 };
 
 setInterval(function() {
-    var toolsItem = $('a[data-action="toggleShowPastPlannedMoves"]');
-    console.warn(toolsItem);
-    var sentinel = toolsItem.closest('ul').children('li.batchExporter');
+    var toolsItem = $('a[data-action="toggleMultiselect"]');
+    var activityFilterItem = $("div div:contains('Activity filter')");
+    console.warn(activityFilterItem);
+    var sentinel = activityFilterItem.closest('ul').children('li.batchExporter');
     if (!sentinel || sentinel.length === 0) {
         _.forOwn(formats, function(format, name) {
             var li = $('<li class="batchExporter"></li>');
